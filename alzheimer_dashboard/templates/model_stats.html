@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <h2 class="mb-4"><i class="fas fa-chart-bar me-2"></i>Model Performance Statistics</h2>
+
+    <!-- Overall Metrics -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stat-card primary">
+                <h6>Overall Accuracy</h6>
+                <h3>{{ "%.2f"|format(metrics['overall_accuracy']*100) }}%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card success">
+                <h6>Macro F1-Score</h6>
+                <h3>{{ "%.4f"|format(metrics['macro_f1']) }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card info">
+                <h6>Cohen's Kappa</h6>
+                <h3>{{ "%.4f"|format(metrics['cohen_kappa']) }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card warning">
+                <h6>Macro AUC</h6>
+                <h3>{{ "%.4f"|format(metrics['macro_auc']) }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Per-Class Metrics Table -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">Per-Class Performance Metrics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Class</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>F1-Score</th>
+                                    <th>Support</th>
+                                    <th>AUC-ROC</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for class_name, metrics_data in metrics['per_class_metrics'].items() %}
+                                <tr>
+                                    <td><strong>{{ class_name }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-success">{{ "%.4f"|format(metrics_data['precision']) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ "%.4f"|format(metrics_data['recall']) }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ "%.4f"|format(metrics_data['f1']) }}</span>
+                                    </td>
+                                    <td>
+                                        <strong>{{ metrics_data['support'] }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-warning">{{ "%.4f"|format(metrics_data['auc']) }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">Per-Class F1-Scores</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="/api/metrics_chart" alt="Metrics Chart" class="img-fluid">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">Confusion Matrix</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="/api/confusion_matrix" alt="Confusion Matrix" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-left: 4px solid;
+}
+
+.stat-card.primary {
+    border-left-color: #667eea;
+}
+
+.stat-card h6 {
+    color: #999;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.stat-card h3 {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-card.success { border-left-color: #28a745; }
+.stat-card.info { border-left-color: #17a2b8; }
+.stat-card.warning { border-left-color: #ffc107; }
+</style>
+{% endblock %}

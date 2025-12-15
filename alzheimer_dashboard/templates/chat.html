@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <!-- Hero Section -->
+    <div class="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 text-white py-16 px-4 shadow-lg">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <i class="fas fa-robot mr-3"></i>AI Medical Assistant
+            </h1>
+            <p class="text-xl text-cyan-50">Powered by Google Gemini & 6 Research Papers</p>
+            <p class="text-sm text-cyan-100 mt-2">Ask about Alzheimer's stages, MRI findings, diagnosis, and deep learning classification</p>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Chat Interface -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden" style="height: 650px; display: flex; flex-direction: column;">
+                    <!-- Chat Header -->
+                    <div class="bg-gradient-to-r from-cyan-600 to-blue-700 text-white px-6 py-4 shadow-md">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                    <i class="fas fa-brain text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">AI Research Assistant</h3>
+                                    <p class="text-xs text-cyan-100">Online & Ready</p>
+                                </div>
+                            </div>
+                            <span class="bg-emerald-400 text-emerald-900 text-xs px-3 py-1 rounded-full font-semibold shadow-sm">
+                                <i class="fas fa-circle text-xs mr-1 animate-pulse"></i>Active
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div id="mainChatMessages" class="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">
+                        <div class="flex justify-start">
+                            <div class="max-w-md">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-md">
+                                    <p class="text-sm text-gray-800">
+                                        👋 Hello! I'm your AI medical assistant trained on 6 peer-reviewed research papers about Alzheimer's disease and brain imaging.
+                                    </p>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 ml-2">AI Assistant • Just now</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <div class="max-w-md">
+                                <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-md">
+                                    <p class="text-sm text-gray-800 mb-3">I can help you with:</p>
+                                    <ul class="text-sm text-gray-700 space-y-1">
+                                        <li>✓ Alzheimer's disease stages and classifications</li>
+                                        <li>✓ MRI findings and brain atrophy patterns</li>
+                                        <li>✓ Deep learning diagnosis methods</li>
+                                        <li>✓ Hippocampal and ventricular changes</li>
+                                        <li>✓ Disease progression and prediction</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="border-t bg-white p-4">
+                        <form id="mainChatForm" class="flex gap-3">
+                            <input 
+                                type="text" 
+                                id="mainChatInput" 
+                                placeholder="Ask about Alzheimer's disease, MRI findings, or this AI model..." 
+                                class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                                required
+                            />
+                            <button 
+                                type="submit" 
+                                class="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:from-cyan-700 hover:to-blue-700 transition-all duration-200 font-semibold"
+                            >
+                                <i class="fas fa-paper-plane mr-2"></i>Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Questions -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i class="fas fa-bolt text-yellow-500"></i>
+                        Quick Questions
+                    </h3>
+                    <div class="space-y-2">
+                        <button class="quick-question w-full text-left p-3 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-all duration-200 text-sm border border-cyan-100 hover:border-cyan-200 hover:shadow-sm" data-question="What are the four stages of Alzheimer's classified by this model?">
+                            <i class="fas fa-angle-right text-cyan-600 mr-2"></i>
+                            Alzheimer's stages
+                        </button>
+                        <button class="quick-question w-full text-left p-3 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-all duration-200 text-sm border border-emerald-100 hover:border-emerald-200 hover:shadow-sm" data-question="How is hippocampal atrophy measured on MRI?">
+                            <i class="fas fa-angle-right text-emerald-600 mr-2"></i>
+                            Hippocampal atrophy
+                        </button>
+                        <button class="quick-question w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all duration-200 text-sm border border-blue-100 hover:border-blue-200 hover:shadow-sm" data-question="What is the accuracy and performance of the EfficientNet-B0 model used in this system?">
+                            <i class="fas fa-angle-right text-blue-600 mr-2"></i>
+                            Model performance
+                        </button>
+                        <button class="quick-question w-full text-left p-3 bg-amber-50 hover:bg-amber-100 rounded-lg transition-all duration-200 text-sm border border-amber-100 hover:border-amber-200 hover:shadow-sm" data-question="How does MCI progress to Alzheimer's dementia?">
+                            <i class="fas fa-angle-right text-amber-600 mr-2"></i>
+                            MCI progression
+                        </button>
+                        <button class="quick-question w-full text-left p-3 bg-rose-50 hover:bg-rose-100 rounded-lg transition-all duration-200 text-sm border border-rose-100 hover:border-rose-200 hover:shadow-sm" data-question="What brain changes are visible on MRI in Alzheimer's?">
+                            <i class="fas fa-angle-right text-rose-600 mr-2"></i>
+                            Brain changes on MRI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Knowledge Base Info -->
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl shadow-lg p-6 border border-blue-100">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <i class="fas fa-book text-blue-600"></i>
+                        Knowledge Base
+                    </h3>
+                    <p class="text-sm text-gray-700 mb-3">Powered by 6 research papers:</p>
+                    <ul class="text-xs text-gray-600 space-y-2">
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-file-alt text-blue-500 mt-0.5"></i>
+                            <span>Brain Imaging in Alzheimer Disease</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-file-alt text-green-500 mt-0.5"></i>
+                            <span>MRI-Driven Diagnosis Using Deep Learning</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-file-alt text-purple-500 mt-0.5"></i>
+                            <span>Classification & Epidemiology of MCI</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fas fa-file-alt text-orange-500 mt-0.5"></i>
+                            <span>Hippocampal Atrophy Studies</span>
+                        </li>
+                        <li class="text-gray-500">+ 2 more research papers</li>
+                    </ul>
+                    <div class="mt-4 pt-4 border-t border-blue-200">
+                        <p class="text-xs text-gray-600">
+                            <i class="fas fa-shield-alt text-green-500 mr-1"></i>
+                            All responses backed by peer-reviewed research
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Model Info -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <i class="fas fa-microchip text-purple-600"></i>
+                        AI Model
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">LLM:</span>
+                            <span class="font-semibold">Gemini 2.0 Flash</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Embeddings:</span>
+                            <span class="font-semibold">HuggingFace</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Vector DB:</span>
+                            <span class="font-semibold">FAISS</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Classifier:</span>
+                            <span class="font-semibold">EfficientNet-B0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Accuracy:</span>
+                            <span class="font-bold text-green-600">99.98%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+<script>
+function formatAIResponse(text) {
+    // Professional formatting with special designs for sources and bold text
+    let formatted = text;
+    
+    // Remove ALL ** at start/end of text or sentences
+    formatted = formatted.replace(/^\*\*\s*/gm, '');
+    formatted = formatted.replace(/\s*\*\*$/gm, '');
+    formatted = formatted.replace(/^\*\*|\*\*$/g, '');
+    
+    // Protect code blocks
+    const codeBlocks = [];
+    formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
+        codeBlocks.push(match);
+        return `__CODE_BLOCK_${codeBlocks.length - 1}__`;
+    });
+    
+    // Handle source citations with professional badge design
+    // Pattern: (filename.txt) or (Source Name)
+    formatted = formatted.replace(/\(([^)]+\.(?:txt|pdf|docx?))\)/gi, (match, filename) => {
+        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 my-1 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg text-xs font-medium text-cyan-700 shadow-sm">
+            <i class="fas fa-file-alt text-cyan-500"></i>
+            <span>${filename}</span>
+        </span>`;
+    });
+    
+    // Handle "Table X" or "Figure X" references
+    formatted = formatted.replace(/\((Table|Figure)\s+\d+\)/gi, (match, type) => {
+        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-200 rounded text-xs font-medium text-indigo-700">
+            <i class="fas fa-table text-indigo-500 text-[10px]"></i>
+            <span>${match.replace(/[()]/g, '')}</span>
+        </span>`;
+    });
+    
+    // Convert **bold text** with professional highlight styling
+    formatted = formatted.replace(/\*\*([^*\n]+?)\*\*/g, (match, text) => {
+        return `<span class="inline-block px-2 py-0.5 mx-0.5 bg-gradient-to-r from-blue-50 to-cyan-50 border-l-2 border-cyan-500 rounded-r text-gray-900 font-semibold shadow-sm">${text}</span>`;
+    });
+    
+    // Remove any remaining single * (no italics)
+    formatted = formatted.replace(/(?<!\w)\*([^*]+?)\*(?!\w)/g, '$1');
+    
+    // Convert numbered lists with modern badges
+    formatted = formatted.replace(/^(\d+)\.\s+([^\n]+)/gm, (match, num, text) => {
+        return `<div class="flex items-start gap-3 my-2.5 pl-1">
+            <span class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-xs font-bold shadow-md">${num}</span>
+            <span class="flex-1 pt-1 text-gray-700 leading-relaxed">${text}</span>
+        </div>`;
+    });
+    
+    // Convert bullet points
+    formatted = formatted.replace(/^[•\-]\s+([^\n]+)/gm, (match, text) => {
+        return `<div class="flex items-start gap-2.5 my-2 pl-1">
+            <span class="flex-shrink-0 mt-1.5 w-2 h-2 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-sm"></span>
+            <span class="flex-1 text-gray-700 leading-relaxed">${text}</span>
+        </div>`;
+    });
+    
+    // Handle section headers
+    formatted = formatted.replace(/^([A-Z][^:\n]{3,50}):$/gm, (match, header) => {
+        return `<h4 class="font-bold text-gray-900 mt-5 mb-2.5 text-base border-l-4 border-cyan-500 pl-3 bg-gradient-to-r from-cyan-50/50 to-transparent py-1.5 rounded">${header}</h4>`;
+    });
+    
+    // Split into paragraphs
+    const paragraphs = formatted.split(/\n\n+/);
+    formatted = paragraphs.map(para => {
+        para = para.trim();
+        if (!para) return '';
+        
+        // Don't wrap if already HTML
+        if (para.startsWith('<div') || para.startsWith('<h') || para.startsWith('<span')) {
+            return para;
+        }
+        
+        return `<p class="text-sm leading-relaxed text-gray-700 mb-3">${para}</p>`;
+    }).join('');
+    
+    // Convert single newlines to <br> in text
+    formatted = formatted.replace(/([^>])\n(?!<)/g, '$1<br>');
+    
+    // Restore code blocks
+    codeBlocks.forEach((block, i) => {
+        formatted = formatted.replace(`__CODE_BLOCK_${i}__`, 
+            `<pre class="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-xs font-mono my-3 shadow-lg border border-gray-700">${block.replace(/```/g, '')}</pre>`
+        );
+    });
+    
+    // Final cleanup: remove any remaining **
+    formatted = formatted.replace(/\*\*/g, '');
+    formatted = formatted.replace(/\s\*\s/g, ' ');
+    
+    return `<div class="space-y-1">${formatted}</div>`;
+}
+
+function addMainMessage(text, isUser) {
+    const container = document.getElementById('mainChatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `flex ${isUser ? 'justify-end' : 'justify-start'} message-animation`;
+    
+    const timestamp = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    
+    // Format AI responses
+    const formattedText = isUser ? text : formatAIResponse(text);
+    
+    messageDiv.innerHTML = `
+        <div class="max-w-3xl">
+            <div class="${isUser 
+                ? 'bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-lg hover:shadow-xl transition-shadow duration-200' 
+                : 'bg-white text-gray-800 rounded-2xl rounded-tl-sm shadow-md border border-gray-200 hover:shadow-lg transition-all duration-200'
+            } p-5">
+                ${isUser 
+                    ? `<p class="text-sm leading-relaxed">${text}</p>` 
+                    : formattedText
+                }
+            </div>
+            <p class="text-xs text-gray-500 mt-2 flex items-center gap-1.5 ${isUser ? 'justify-end mr-2' : 'ml-2'}">
+                ${isUser 
+                    ? '<i class="fas fa-user-circle text-cyan-600"></i><span>You</span>' 
+                    : '<i class="fas fa-robot text-blue-600"></i><span>AI Assistant</span>'
+                } 
+                <span class="text-gray-400">•</span>
+                <span>${timestamp}</span>
+            </p>
+        </div>
+    `;
+    
+    container.appendChild(messageDiv);
+    
+    // Smooth scroll with delay
+    setTimeout(() => {
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
+}
+
+function showMainTyping() {
+    const container = document.getElementById('mainChatMessages');
+    const typingDiv = document.createElement('div');
+    typingDiv.id = 'mainTypingIndicator';
+    typingDiv.className = 'flex justify-start';
+    typingDiv.innerHTML = `
+        <div class="bg-white rounded-2xl rounded-tl-sm p-4 shadow-md">
+            <div class="flex gap-1">
+                <div class="w-2 h-2 bg-purple-600 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-purple-600 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+        </div>
+    `;
+    container.appendChild(typingDiv);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeMainTyping() {
+    const indicator = document.getElementById('mainTypingIndicator');
+    if (indicator) indicator.remove();
+}
+
+document.getElementById('mainChatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const input = document.getElementById('mainChatInput');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    addMainMessage(message, true);
+    input.value = '';
+    
+    showMainTyping();
+    
+    try {
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        
+        const data = await response.json();
+        removeMainTyping();
+        
+        if (data.success) {
+            addMainMessage(data.response, false);
+        } else {
+            addMainMessage(`❌ Error: ${data.error}`, false);
+        }
+    } catch (error) {
+        removeMainTyping();
+        addMainMessage(`❌ Connection error: ${error.message}`, false);
+    }
+});
+
+// Quick questions
+document.querySelectorAll('.quick-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const question = btn.dataset.question;
+        document.getElementById('mainChatInput').value = question;
+        document.getElementById('mainChatForm').dispatchEvent(new Event('submit'));
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Alzheimer's AI Classifier{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=2">
+    <script src="{{ url_for('static', filename='js/main.js') }}?v=2"></script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #dbeafe 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .gradient-header {
+            background: linear-gradient(135deg, #0891b2 0%, #2563eb 50%, #4f46e5 100%);
+        }
+        
+        .metric-card {
+            transition: all 0.3s ease;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+
+        /* Floating Chat Button */
+        #chatButton {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            z-index: 50;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #chatButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Chat Widget */
+        #chatWidget {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 580px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 49;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chatWidget.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .chat-message {
+            margin-bottom: 20px;
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .message-user {
+            text-align: right;
+        }
+
+        .message-bot {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 14px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            line-height: 1.6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .message-user .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-bot .message-bubble {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* PROFESSIONAL MARKDOWN FORMATTING */
+        .message-bot .message-bubble strong {
+            font-weight: 700;
+            color: #667eea;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .message-bot .message-bubble em,
+        .message-bot .message-bubble .quote-text {
+            font-style: italic;
+            color: #764ba2;
+            background: #f3e8ff;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border-left: 3px solid #a78bfa;
+            display: inline-block;
+            margin: 2px 0;
+        }
+
+        .message-bot .message-bubble ul {
+            margin: 8px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .message-bot .message-bubble li {
+            padding-left: 24px;
+            position: relative;
+            margin-bottom: 6px;
+        }
+
+        .message-bot .message-bubble li:before {
+            content: "●";
+            position: absolute;
+            left: 8px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .message-bot .message-bubble ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-bot .message-bubble ol li {
+            margin-bottom: 6px;
+        }
+
+        .message-bot .message-bubble p {
+            margin: 8px 0;
+        }
+
+        .message-bot .message-bubble code {
+            background: #1e293b;
+            color: #fbbf24;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            padding: 14px 18px;
+            background: white;
+            border-radius: 18px;
+            width: fit-content;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.6;
+            }
+            30% {
+                transform: translateY(-12px);
+                opacity: 1;
+            }
+        }
+
+        .quick-question-btn {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bfdbfe;
+        }
+
+        .quick-question-btn:hover {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+
+        @media (max-width: 640px) {
+            #chatWidget {
+                width: calc(100vw - 30px);
+                right: 15px;
+                bottom: 90px;
+                height: 70vh;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="gradient-header text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-brain text-2xl"></i>
+                    <span class="text-2xl font-bold">Alzheimer's AI</span>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="/" class="hover:text-gray-200 transition">Dashboard</a>
+                    <a href="/#stats" class="hover:text-gray-200 transition">Statistics</a>
+                    <a href="/#predict" class="hover:text-gray-200 transition">Predict</a>
+                    <a href="/xai-analysis" class="hover:text-gray-200 transition">
+                        <i class="fas fa-microscope mr-1"></i>XAI Analysis
+                    </a>
+                    <a href="#" onclick="toggleChat(); return false;" class="hover:text-gray-200 transition">
+                        <i class="fas fa-comments mr-1"></i>AI Assistant
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional Footer with Disclaimer -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <!-- Warning Banner -->
+            <div class="bg-yellow-600 text-white rounded-lg p-4 mb-6 flex items-start gap-3">
+                <i class="fas fa-exclamation-triangle text-2xl mt-1"></i>
+                <div>
+                    <h3 class="font-bold text-lg mb-1">Medical Disclaimer</h3>
+                    <p class="text-sm leading-relaxed">
+                        This application is a <strong>research and educational tool</strong> developed for portfolio demonstration purposes only. 
+                        It is <strong>NOT</strong> a medical diagnostic device and should <strong>NOT</strong> be used for actual medical diagnosis or treatment decisions. 
+                        Always consult with qualified healthcare professionals for proper diagnosis and medical advice.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer Content -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-6">
+                <!-- Project Info -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-brain mr-2"></i>Alzheimer's AI Classifier
+                    </h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">
+                        Deep learning model for Alzheimer's disease classification from MRI scans using EfficientNet-B0 architecture with 99.98% accuracy.
+                    </p>
+                </div>
+
+                <!-- Technologies -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3">Technologies</h3>
+                    <ul class="text-gray-400 text-sm space-y-1">
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>PyTorch & EfficientNet-B0</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Flask & Tailwind CSS</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>Gemini AI & LangChain RAG</li>
+                        <li><i class="fas fa-check text-green-400 mr-2"></i>GradCAM XAI Visualization</li>
+                    </ul>
+                </div>
+
+                <!-- Connect -->
+                <div>
+                    <h3 class="font-bold text-lg mb-3">Connect With Me</h3>
+                    <div class="flex gap-4">
+                        <a href="https://github.com/YassirCher" target="_blank" rel="noopener noreferrer" 
+                           class="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg transition transform hover:scale-110">
+                            <i class="fab fa-github text-2xl"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/yassir-chergui-051331369" target="_blank" rel="noopener noreferrer"
+                           class="bg-blue-600 hover:bg-blue-500 p-3 rounded-lg transition transform hover:scale-110">
+                            <i class="fab fa-linkedin text-2xl"></i>
+                        </a>
+                        <a href="mailto:your.email@example.com"
+                           class="bg-red-600 hover:bg-red-500 p-3 rounded-lg transition transform hover:scale-110">
+                            <i class="fas fa-envelope text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-800 pt-6 text-center">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2025 Alzheimer's AI Classification Dashboard | Built with ❤️ for AI Research & Education
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chat Button -->
+    <button id="chatButton" onclick="toggleChat()" title="Chat with AI Assistant">
+        <i class="fas fa-comments text-2xl"></i>
+    </button>
+
+    <!-- Chat Widget -->
+    <div id="chatWidget">
+        <div class="chat-header">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-robot text-2xl"></i>
+                <div>
+                    <div class="font-bold text-lg">AI Assistant</div>
+                    <div class="text-xs text-gray-200">Alzheimer's & Brain Imaging Expert</div>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="text-white hover:text-gray-200 transition">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <div class="chat-message message-bot">
+                <div class="message-bubble">
+                    <p class="text-sm">👋 Hi! I'm your AI assistant specialized in Alzheimer's disease and brain imaging. Ask me anything!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <form id="chatForm" class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="chatInput" 
+                    placeholder="Ask a question..." 
+                    class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+                    required
+                />
+                <button 
+                    type="submit" 
+                    class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-3 rounded-xl hover:shadow-lg transition transform hover:scale-105"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Professional Markdown Formatter
+        function formatChatbotMessage(text) {
+            if (!text) return '';
+            
+            // Convert **text** to <strong>text</strong>
+            text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert "quoted text" to styled quotes
+            text = text.replace(/"([^"]+)"/g, '<span class="quote-text">$1</span>');
+            
+            // Convert numbered lists (1. 2. 3.)
+            text = text.replace(/^(\d+)\.\s+(.+)$/gm, '<li>$2</li>');
+            if (text.includes('<li>')) {
+                text = text.replace(/(<li>.*<\/li>)/s, '<ol>$1</ol>');
+            }
+            
+            // Convert bullet points (- or *)
+            text = text.replace(/^[\-\*]\s+(.+)$/gm, '<li>$1</li>');
+            if (text.includes('<li>') && !text.includes('<ol>')) {
+                text = text.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+            }
+            
+            // Convert line breaks to <br>
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+
+        // Chat widget functionality
+        function toggleChat() {
+            const widget = document.getElementById('chatWidget');
+            widget.classList.toggle('active');
+            
+            if (widget.classList.contains('active')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        function addMessage(text, isUser) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isUser ? 'message-user' : 'message-bot'}`;
+            
+            const bubbleDiv = document.createElement('div');
+            bubbleDiv.className = 'message-bubble';
+            
+            // Use formatted HTML for bot messages, plain text for user
+            if (isUser) {
+                bubbleDiv.innerHTML = `<p class="text-sm">${text}</p>`;
+            } else {
+                bubbleDiv.innerHTML = `<div class="text-sm">${formatChatbotMessage(text)}</div>`;
+            }
+            
+            messageDiv.appendChild(bubbleDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typingIndicator';
+            typingDiv.className = 'chat-message message-bot';
+            typingDiv.innerHTML = `
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        document.getElementById('chatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            input.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                removeTypingIndicator();
+                
+                if (data.success) {
+                    addMessage(data.response, false);
+                } else {
+                    addMessage(`❌ Error: ${data.error}`, false);
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`❌ Connection error: ${error.message}`, false);
+            }
+        });
+
+        // Quick questions
+        const quickQuestions = [
+            "What are the stages of Alzheimer's disease?",
+            "How is MRI used to diagnose Alzheimer's?",
+            "What is the accuracy of this model?"
+        ];
+
+        // Add quick question buttons after initial message
+        setTimeout(() => {
+            if (document.getElementById('chatMessages').children.length === 1) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const quickDiv = document.createElement('div');
+                quickDiv.className = 'chat-message message-bot';
+                quickDiv.innerHTML = `
+                    <div class="message-bubble">
+                        <p class="text-xs font-semibold mb-3 text-gray-600">Quick questions to get started:</p>
+                        <div class="space-y-2">
+                            ${quickQuestions.map((q, index) => `
+                                <button data-question="${q.replace(/"/g, '&quot;')}" class="quick-question-btn block w-full text-left text-xs rounded-lg px-3 py-2">
+                                    <i class="fas fa-question-circle mr-2 text-purple-500"></i>${q}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                messagesContainer.appendChild(quickDiv);
+                
+                // Add click event listeners
+                quickDiv.querySelectorAll('.quick-question-btn').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const question = this.getAttribute('data-question');
+                        document.getElementById('chatInput').value = question;
+                        document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+                    });
+                });
+            }
+        }, 2000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
